@@ -17,7 +17,7 @@ import javax.persistence.OneToMany;
 public class GameItem {
 	
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
 	long itemid;	
 	
@@ -29,6 +29,16 @@ public class GameItem {
 	
 	@OneToMany( mappedBy="gameitem",cascade = {CascadeType.ALL},fetch=FetchType.LAZY )
 	Set<ItemBuyLog>	itembuylog;
+
+	public GameItem() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public GameItem(String itemname, String itemtype, int itemprice) {
+		this.itemname = itemname;
+		this.itemtype = itemtype;
+		this.itemprice = itemprice;
+	}
 
 	public long getItemid() {
 		return itemid;
@@ -69,8 +79,6 @@ public class GameItem {
 	public void setBuylogs(Set<ItemBuyLog> itembuylog) {
 		this.itembuylog = itembuylog;
 	}
-	
-	
 	
 		
 }

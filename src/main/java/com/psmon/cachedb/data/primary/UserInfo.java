@@ -10,12 +10,33 @@ import javax.persistence.Id;
 public class UserInfo {
 	
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
 	long userid;
 	
+	String name;
 	int	age;
 	int	sex;	//1남자 ,2여자
+	
+	
+	public UserInfo() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public UserInfo(String name, int age, int sex) {
+		this.name = name;
+		this.age = age;
+		this.sex = sex;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public long getUserid() {
 		return userid;
 	}

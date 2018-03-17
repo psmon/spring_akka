@@ -14,11 +14,11 @@ import javax.persistence.ManyToOne;
 public class ItemBuyLog {
 	
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "log_id")
 	long logid;
 	
-	LocalTime buytime;
+	String buytime;
 	
 	@ManyToOne
     @JoinColumn(name = "item_id" )  
@@ -28,24 +28,32 @@ public class ItemBuyLog {
 	@ManyToOne
     @JoinColumn(name = "user_id" ) 
 	UserInfo	userinfo;
+	
+	public ItemBuyLog() {
+		// TODO Auto-generated constructor stub
+	}
 
+	public ItemBuyLog(String buytime, GameItem gameitem, UserInfo userinfo) {
+		this.buytime = buytime;
+		this.gameitem = gameitem;
+		this.userinfo = userinfo;
+	}
 
 	public long getLogid() {
 		return logid;
 	}
-
 
 	public void setLogid(long logid) {
 		this.logid = logid;
 	}
 
 
-	public LocalTime getBuytime() {
+	public String getBuytime() {
 		return buytime;
 	}
 
 
-	public void setBuytime(LocalTime buytime) {
+	public void setBuytime(String buytime) {
 		this.buytime = buytime;
 	}
 
