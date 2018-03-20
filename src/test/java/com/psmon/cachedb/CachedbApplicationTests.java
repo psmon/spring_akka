@@ -34,7 +34,7 @@ public class CachedbApplicationTests {
 	public void contextLoads() {
 		initData();
 		
-	     int[] score = {Integer.MIN_VALUE};
+	     int[] score = {Integer.MAX_VALUE};
 	     int[] no = {0};
 	     int[] rank = {0}; 
 		itemBuyLogRepository.findByUserinfoAgeBetween(10, 20).stream()
