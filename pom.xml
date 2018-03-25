@@ -79,8 +79,7 @@
 	        <artifactId>akka-testkit_2.11</artifactId>
 	        <version>${akka.version}</version>
     	</dependency>
-		
-		
+
 	</dependencies>
 
 	<build>
