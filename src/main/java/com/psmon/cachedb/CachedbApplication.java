@@ -10,6 +10,7 @@ import akka.actor.ActorRef;
 
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
+import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
@@ -42,6 +43,18 @@ public class CachedbApplication {
         
         //리모트를 통한 전송
         testActorRemote.tell("ready spring boot -again too", null);
+        
+        /*
+        ActorRef throttler = system.actorOf(Props.create(TimerBasedThrottler.class,
+        	      new Throttler.Rate(3, Duration.create(1, TimeUnit.SECONDS))));
+        	  // Set the target
+        	  throttler.tell(new Throttler.SetTarget(testActor), null);
+        	*/
+        
+        for(int i=0;i<100;i++) {
+        	testActor.tell("t1", ActorRef.noSender());
+       	
+        }
         
         
 	}
