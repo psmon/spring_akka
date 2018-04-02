@@ -1,11 +1,14 @@
 package com.psmon.cachedb;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
 import com.psmon.cachedb.extension.SpringExtension;
 
+import akka.NotUsed;
 import akka.actor.ActorRef;
 
 import akka.actor.ActorSelection;
@@ -13,6 +16,13 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
+import akka.stream.ActorMaterializer;
+import akka.stream.Materializer;
+import akka.stream.OverflowStrategy;
+import akka.stream.ThrottleMode;
+import akka.stream.javadsl.Sink;
+import akka.stream.javadsl.Source;
+import scala.concurrent.duration.FiniteDuration;
 
 @SpringBootApplication
 public class CachedbApplication {
@@ -44,16 +54,17 @@ public class CachedbApplication {
         //리모트를 통한 전송
         testActorRemote.tell("ready spring boot -again too", null);
         
-        /*
-        ActorRef throttler = system.actorOf(Props.create(TimerBasedThrottler.class,
-        	      new Throttler.Rate(3, Duration.create(1, TimeUnit.SECONDS))));
-        	  // Set the target
-        	  throttler.tell(new Throttler.SetTarget(testActor), null);
-        	*/
         
+        final Materializer materializer = ActorMaterializer.create(system);
+        
+        final ActorRef throttler =
+          Source.actorRef(1000, OverflowStrategy.dropNew())
+            .throttle(1,  FiniteDuration.create(1, TimeUnit.SECONDS), 10, ThrottleMode.shaping())
+            .to(Sink.actorRef(testActor, NotUsed.getInstance() ))
+            .run(materializer);
+        	        
         for(int i=0;i<100;i++) {
-        	testActor.tell("t1", ActorRef.noSender());
-       	
+        	throttler.tell(String.format("fasmsg to slow %d", i), ActorRef.noSender());       	
         }
         
         
