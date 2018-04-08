@@ -24,10 +24,16 @@ import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 import scala.concurrent.duration.FiniteDuration;
 
+import static akka.pattern.PatternsCS.ask;
+import static akka.pattern.PatternsCS.pipe;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 @SpringBootApplication
 public class CachedbApplication {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException, ExecutionException  {
 		ApplicationContext context = SpringApplication.run(CachedbApplication.class, args);
 		
         ActorSystem system = context.getBean(ActorSystem.class);
@@ -52,7 +58,12 @@ public class CachedbApplication {
         testActor2.tell("ready spring boot -again", null);
         
         //리모트를 통한 전송
-        testActorRemote.tell("ready spring boot -again too", null);
+        testActorRemote.tell("발사후망각-응답필요없음",ActorRef.noSender() ) ;
+        
+        CompletableFuture<Object> future1 =
+        		  ask(testActorRemote, "응답하라 1979", 1000).toCompletableFuture();
+        
+        String result = String.valueOf(future1.get());
         
         
         final Materializer materializer = ActorMaterializer.create(system);
