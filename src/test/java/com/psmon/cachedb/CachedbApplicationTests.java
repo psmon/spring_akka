@@ -32,26 +32,32 @@ public class CachedbApplicationTests {
 	
 	@Test
 	public void contextLoads() {
+
+		
+	}
+	
+	public void dataTest1() {
 		initData();
 		
 	     int[] score = {Integer.MAX_VALUE};
 	     int[] no = {0};
 	     int[] rank = {0}; 
 		itemBuyLogRepository.findByUserinfoAgeBetween(10, 20).stream()
-        .sorted((a,b) -> a.getBuyitem().getItemprice() - b.getBuyitem().getItemprice() )
-        .map(p -> {
-             ++no[0];
-             if (score[0] != p.getBuyitem().getItemprice()) rank[0] = no[0];             
-             String itemRank = String.format("item:%s price:%d rank:%d", 
-            		 p.getBuyitem().getItemname(),
-            		 p.getBuyitem().getItemprice(),
-            		 rank[0]);
-             System.out.println(itemRank);
-             return itemRank;                              
-        })
-        .collect(Collectors.toList());
+       .sorted((a,b) -> a.getBuyitem().getItemprice() - b.getBuyitem().getItemprice() )
+       .map(p -> {
+            ++no[0];
+            if (score[0] != p.getBuyitem().getItemprice()) rank[0] = no[0];             
+            String itemRank = String.format("item:%s price:%d rank:%d", 
+           		 p.getBuyitem().getItemname(),
+           		 p.getBuyitem().getItemprice(),
+           		 rank[0]);
+            System.out.println(itemRank);
+            return itemRank;                              
+       })
+       .collect(Collectors.toList());
 		
 	}
+	
 	
 	public void initData() {
 		
