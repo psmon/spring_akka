@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.psmon.cachedb.data.primary.GameItem;
@@ -16,6 +17,10 @@ import com.psmon.cachedb.data.primary.ItemBuyLog;
 import com.psmon.cachedb.data.primary.ItemBuyLogRepository;
 import com.psmon.cachedb.data.primary.UserInfo;
 import com.psmon.cachedb.data.primary.UserInfoRepository;
+import com.psmon.cachedb.extension.SpringExtension;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -30,11 +35,22 @@ public class CachedbApplicationTests {
 	@Autowired
 	UserInfoRepository userInfoRepository;
 	
+	@Autowired
+	ApplicationContext context;
+	
 	@Test
 	public void contextLoads() {
+		ActorSystem system = context.getBean(ActorSystem.class);
+		SpringExtension ext = context.getBean(SpringExtension.class);		
+		actorTest1(system,ext);
 
-		
 	}
+	
+	protected void actorTest1(ActorSystem system,SpringExtension ext) {
+		ActorRef testActor = system.actorOf(ext.props("testActor"),"service1");		
+		testActor.tell("ready spring boot",null);				
+	}
+	
 	
 	public void dataTest1() {
 		initData();
