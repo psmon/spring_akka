@@ -27,6 +27,7 @@ import scala.concurrent.duration.FiniteDuration;
 import static akka.pattern.PatternsCS.ask;
 import static akka.pattern.PatternsCS.pipe;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -45,7 +46,9 @@ public class CachedbApplication {
         SpringExtension ext = context.getBean(SpringExtension.class);
         
         //액터 생성... 
-        ActorRef testActor = system.actorOf(ext.props("testActor"),"service1");
+        ActorRef testActor = system.actorOf(ext.props("testActor")
+        		.withDispatcher("my-thread-pool-dispatcher"),
+        		"service1");
         
         ActorSelection testActor2 = system.actorSelection("user/service1");
         
@@ -58,19 +61,26 @@ public class CachedbApplication {
         testActor2.tell("ready spring boot -again", null);
         
         //리모트를 통한 전송
-        testActorRemote.tell("발사후망각-응답필요없음",ActorRef.noSender() ) ;
-        
+        /*
+        testActorRemote.tell("발사후망각-응답필요없음",ActorRef.noSender() ) ;        
         CompletableFuture<Object> future1 =
-        		  ask(testActorRemote, "응답하라 1979", 1000).toCompletableFuture();
+        		  ask(testActorRemote, "응답하라 1979", 1000).toCompletableFuture();*/
+
+        testActor.tell("발사후망각-응답필요없음",ActorRef.noSender() ) ;        
+        CompletableFuture<Object> future1 =
+        		  ask(testActor, "응답하라 1979", 1000).toCompletableFuture();
+
         
         String result = String.valueOf(future1.get());
+        
+        log.info("msg result:" + result);
         
         
         final Materializer materializer = ActorMaterializer.create(system);
         
         final ActorRef throttler =
           Source.actorRef(1000, OverflowStrategy.dropNew())
-            .throttle(1,  FiniteDuration.create(1, TimeUnit.SECONDS), 10, ThrottleMode.shaping())
+          	.throttle(10,  Duration.ofSeconds(1))
             .to(Sink.actorRef(testActor, NotUsed.getInstance() ))
             .run(materializer);
         	        

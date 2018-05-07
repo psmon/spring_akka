@@ -22,6 +22,8 @@ import com.psmon.cachedb.extension.SpringExtension;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
+import akka.testkit.javadsl.TestKit;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CachedbApplicationTests {
@@ -42,13 +44,34 @@ public class CachedbApplicationTests {
 	public void contextLoads() {
 		ActorSystem system = context.getBean(ActorSystem.class);
 		SpringExtension ext = context.getBean(SpringExtension.class);		
-		actorTest1(system,ext);
+		actorTest2(system,ext);
 
 	}
 	
-	protected void actorTest1(ActorSystem system,SpringExtension ext) {
+	protected void actorTest2(ActorSystem system,SpringExtension ext) {
 		ActorRef testActor = system.actorOf(ext.props("testActor"),"service1");		
-		testActor.tell("ready spring boot",null);				
+	    new TestKit(system) {{			
+			testActor.tell( "hi", getRef() );
+		      // await the correct response
+		    expectMsg(java.time.Duration.ofSeconds(1), "너의 메시지에 응답을함");				    	
+	    }};		
+	}
+	
+	protected void actorTest1(ActorSystem system,SpringExtension ext) {
+		ActorRef testActor = system.actorOf(ext.props("testActor")
+				.withDispatcher("blocking-io-dispatcher"),
+				"service1");
+		
+		for(int i=0;i<10;i++)
+			testActor.tell("test message wiht dispatcher",null);
+		
+		try {
+			Thread.sleep(4000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	
