@@ -1,7 +1,15 @@
 package com.psmon.cachedb;
 
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -11,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.psmon.cachedb.actors.TestActor;
 import com.psmon.cachedb.data.primary.GameItem;
 import com.psmon.cachedb.data.primary.GameItemRepository;
 import com.psmon.cachedb.data.primary.ItemBuyLog;
@@ -21,8 +30,10 @@ import com.psmon.cachedb.extension.SpringExtension;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-
+import akka.pattern.PatternsCS;
+import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
+import junit.framework.Assert;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -44,17 +55,51 @@ public class CachedbApplicationTests {
 	public void contextLoads() {
 		ActorSystem system = context.getBean(ActorSystem.class);
 		SpringExtension ext = context.getBean(SpringExtension.class);		
-		actorTest2(system,ext);
+		actorTest2(system,ext);		
+		actorTest3(system,ext);
+		actorTest4(system,ext);
+		
+		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );
+		
 
 	}
-	
-	protected void actorTest2(ActorSystem system,SpringExtension ext) {
-		ActorRef testActor = system.actorOf(ext.props("testActor"),"service1");		
-	    new TestKit(system) {{			
-			testActor.tell( "hi", getRef() );
+		
+	protected void actorTest2(ActorSystem system,SpringExtension ext) {			
+	    new TestKit(system) {{
+	    	final ActorRef testActor = system.actorOf( ext.props("testActor"),"test1");	    		    
+			testActor.tell( "hi", getRef() );			
 		      // await the correct response
-		    expectMsg(java.time.Duration.ofSeconds(1), "너의 메시지에 응답을함");				    	
+		    expectMsg(java.time.Duration.ofSeconds(1), "너의 메시지에 응답을함");
+		    
+	    }};
+	    
+	}
+	
+	protected void actorTest3(ActorSystem system,SpringExtension ext) {
+	    new TestKit(system) {{
+	    	final ActorRef testActor = system.actorOf( ext.props("testActor"),"test2");	    	
+	    	final TestKit probe = new TestKit(system);	//추가 테스트 객체생성..	    	
+		    within(java.time.Duration.ofSeconds(3), () -> {
+		    	testActor.tell( "hi", probe.getRef() );
+		    	//메시지가 오기를 기다림
+		    	awaitCond(probe::msgAvailable);
+		    	//메시지검사
+		    	probe.expectMsg(java.time.Duration.ofSeconds(0), "너의 메시지에 응답을함");
+		    	return null;
+		    });
 	    }};		
+	}
+	
+	protected void actorTest4(ActorSystem system,SpringExtension ext) {
+	    final TestActorRef<TestActor> testB = TestActorRef.create(system, ext.props("testActor") , "test3");
+	    final CompletableFuture<Object> future = PatternsCS.ask(testB, "hi", 3000).toCompletableFuture();
+	    assertTrue(future.isDone());
+	    try {
+			assertEquals("너의 메시지에 응답을함", future.get() );
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 	
 	protected void actorTest1(ActorSystem system,SpringExtension ext) {
