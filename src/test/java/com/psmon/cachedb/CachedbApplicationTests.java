@@ -33,11 +33,20 @@ import akka.actor.ActorSystem;
 import akka.pattern.PatternsCS;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
-import junit.framework.Assert;
+import com.psmon.cachedb.actors.fsm.*;
+
+import akka.actor.AbstractFSM;
+import akka.actor.ActorRef;
+import akka.japi.pf.UnitMatch;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.time.Duration;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class CachedbApplicationTests {
+
 
 	@Autowired
 	GameItemRepository gameItemRepository;
@@ -55,14 +64,44 @@ public class CachedbApplicationTests {
 	public void contextLoads() {
 		ActorSystem system = context.getBean(ActorSystem.class);
 		SpringExtension ext = context.getBean(SpringExtension.class);		
-		actorTest2(system,ext);		
-		actorTest3(system,ext);
-		actorTest4(system,ext);
-		
-		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );
-		
-
+		//actorTest2(system,ext);		
+		//actorTest3(system,ext);
+		//actorTest4(system,ext);		
+		fsmTest(system,ext);		
+		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );		
 	}
+	
+
+	protected void fsmTest(ActorSystem system,SpringExtension ext) {
+	    new TestKit(system) {
+
+		{
+	        final ActorRef buncher =
+	          system.actorOf(ext.props("buncher"));
+	        
+	        final ActorRef probe = getRef();
+
+	        buncher.tell(new SetTarget(probe), probe);
+	        buncher.tell(new Queue(42), probe);
+	        buncher.tell(new Queue(43), probe);
+	        LinkedList<Object> list1 = new LinkedList<>();
+	        list1.add(42);
+	        list1.add(43);
+	        expectMsgEquals(new Batch(list1));
+	        buncher.tell(new Queue(44), probe);
+
+			buncher.tell(Flush.Flush , probe);
+	        buncher.tell(new Queue(45), probe);
+	        LinkedList<Object> list2 = new LinkedList<>();
+	        list2.add(44);
+	        expectMsgEquals(new Batch(list2));
+	        LinkedList<Object> list3 = new LinkedList<>();
+	        list3.add(45);
+	        expectMsgEquals(new Batch(list3));
+	        system.stop(buncher);
+	      }};
+	}
+	
 		
 	protected void actorTest2(ActorSystem system,SpringExtension ext) {			
 	    new TestKit(system) {{
