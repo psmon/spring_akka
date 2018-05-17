@@ -67,20 +67,35 @@ public class CachedbApplicationTests {
 		//actorTest2(system,ext);		
 		//actorTest3(system,ext);
 		//actorTest4(system,ext);		
-		fsmTest(system,ext);		
+		//fsmTest(system,ext);
+		routerTest(system,ext);
 		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );		
+	}
+	
+	protected void routerTest(ActorSystem system,SpringExtension ext) {
+	    new TestKit(system) {{
+	    	final ActorRef workers = system.actorOf( ext.props("workers"),"workers");	    		    
+	    	workers.tell( "hi1", getRef() );
+		      // await the correct response
+		    expectMsg(java.time.Duration.ofSeconds(1), "hi too");
+		    
+	    	workers.tell( "hi1", getRef() );
+		      // await the correct response
+		    expectMsg(java.time.Duration.ofSeconds(1), "hi too");
+			
+		    
+	    }};
 	}
 	
 
 	protected void fsmTest(ActorSystem system,SpringExtension ext) {
 	    new TestKit(system) {
-
 		{
 	        final ActorRef buncher =
 	          system.actorOf(ext.props("buncher"));
 	        
 	        final ActorRef probe = getRef();
-
+	        
 	        buncher.tell(new SetTarget(probe), probe);
 	        buncher.tell(new Queue(42), probe);
 	        buncher.tell(new Queue(43), probe);
