@@ -43,5 +43,4 @@ public class Workers extends AbstractActor {
 		.matchAny(o -> log.info("received unknown message"))
 		.build();
 	}
-
 }

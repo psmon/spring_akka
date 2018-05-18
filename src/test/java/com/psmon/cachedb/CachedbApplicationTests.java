@@ -81,9 +81,7 @@ public class CachedbApplicationTests {
 		    
 	    	workers.tell( "hi1", getRef() );
 		      // await the correct response
-		    expectMsg(java.time.Duration.ofSeconds(1), "hi too");
-			
-		    
+		    expectMsg(java.time.Duration.ofSeconds(1), "hi too");					    
 	    }};
 	}
 	
