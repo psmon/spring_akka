@@ -26,11 +26,15 @@ public class Workers extends AbstractActor {
     private ApplicationContext context;    
     
     private ActorRef roundrobinpool = null;
+    
+    private ActorRef randomPool = null;
         
     @Override public void preStart() {
 		log.info("Workers::preStart");
 		SpringExtension ext = context.getBean(SpringExtension.class);		
-		roundrobinpool = getContext().actorOf( FromConfig.getInstance().props( ext.props("testActor") ) , "router1");		
+		roundrobinpool = getContext().actorOf( FromConfig.getInstance().props( ext.props("testActor") ) , "router1");
+		
+		randomPool = getContext().actorOf( FromConfig.getInstance().props( ext.props("testActor") ) , "router2");
 	}
 	
 	@Override
@@ -39,6 +43,10 @@ public class Workers extends AbstractActor {
 		.matchEquals("hi1",s->{
 			log.info("Workers::Received String message: {}", s);
 			roundrobinpool.tell(s, getSender() );					
+		})
+		.matchEquals("hi2",s->{
+			log.info("Workers::Received String message: {}", s);
+			randomPool.tell(s, getSender() );					
 		})
 		.matchAny(o -> log.info("received unknown message"))
 		.build();
