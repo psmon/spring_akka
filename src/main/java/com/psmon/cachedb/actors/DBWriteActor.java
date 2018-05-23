@@ -40,11 +40,9 @@ public class DBWriteActor extends AbstractActor{
     @Override
     public Receive createReceive() {
       return receiveBuilder()
-        .match(  com.psmon.cachedb.actors.fsm.Batch.class , s -> {        	
-        	
+        .match(  com.psmon.cachedb.actors.fsm.Batch.class , s -> {
           log.info("Received ItemBuyLog message: {}", s.toString()  );                              
-          List<ItemBuyLog> insertList = new ArrayList<>();
-          
+          List<ItemBuyLog> insertList = new ArrayList<>();          
           s.getList().forEach( item-> {
         	  ItemBuyLog itemLog = (ItemBuyLog)item;
         	  insertList.add(itemLog);        	  
@@ -54,5 +52,4 @@ public class DBWriteActor extends AbstractActor{
         .matchAny(o -> log.info("received unknown message - {}", o.getClass().getName()  ))
         .build();
     }
-
 }
