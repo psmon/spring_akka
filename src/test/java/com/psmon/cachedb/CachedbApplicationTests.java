@@ -62,13 +62,17 @@ public class CachedbApplicationTests {
 	
 	@Test
 	public void contextLoads() {
+		
+		dataTest1();
+		
 		ActorSystem system = context.getBean(ActorSystem.class);
 		SpringExtension ext = context.getBean(SpringExtension.class);		
 		//actorTest2(system,ext);		
 		//actorTest3(system,ext);
 		//actorTest4(system,ext);		
 		//fsmTest(system,ext);
-		routerTest(system,ext);
+		fsmDBWriteTest(system,ext);
+		//routerTest(system,ext);
 		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );		
 	}
 	
@@ -93,6 +97,33 @@ public class CachedbApplicationTests {
 		    
 		    		    
 	    }};
+	}
+	
+	protected void fsmDBWriteTest(ActorSystem system,SpringExtension ext) {
+	    new TestKit(system) {
+		{
+	        final ActorRef buncher =
+	          system.actorOf(ext.props("buncher"));
+	        
+	        final ActorRef dbWriter =
+	  	          system.actorOf(ext.props("DBWriteActor"));
+	        
+	        final ActorRef probe = getRef();
+	        
+	        buncher.tell(new SetTarget(dbWriter), dbWriter);
+	        
+			for(int i=0;i<200;i++) {				
+				String buyTime = String.format("2018-%02d-%02d", i%10+1,i%20+1);			
+				UserInfo buyUser = userInfoRepository.findAll().get(i%50);
+				GameItem buyItem = gameItemRepository.findAll().get(i%50);			
+				ItemBuyLog addBuyLog = new ItemBuyLog(buyTime, buyItem, buyUser);				
+				buncher.tell(new Queue(addBuyLog), dbWriter);
+			}
+			
+			buncher.tell(Flush.Flush , dbWriter);
+			
+			 system.stop(buncher);
+	      }};
 	}
 	
 
