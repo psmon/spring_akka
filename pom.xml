@@ -56,6 +56,8 @@
 			<scope>test</scope>
 		</dependency>
 		
+		<!--  AKKA  -->
+		
 		<dependency>
 			 <groupId>com.typesafe.akka</groupId>
 			 <artifactId>akka-testkit_2.12</artifactId>
@@ -92,6 +94,18 @@
 		  <groupId>com.typesafe.akka</groupId>
 		  <artifactId>akka-stream_2.12</artifactId>
 		  <version>${akka.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>com.typesafe.akka</groupId>
+		  <artifactId>akka-persistence_2.12</artifactId>
+		  <version>${akka.version}</version>
+		</dependency>		  
+		
+		<dependency>
+			<groupId>org.fusesource.leveldbjni</groupId>
+  			<artifactId>leveldbjni-all</artifactId>
+  			<version>1.8</version>  
 		</dependency>
 
 	</dependencies>

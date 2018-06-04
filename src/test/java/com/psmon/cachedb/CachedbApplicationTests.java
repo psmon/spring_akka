@@ -29,6 +29,7 @@ import com.psmon.cachedb.data.primary.UserInfoRepository;
 import com.psmon.cachedb.extension.SpringExtension;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.Terminated;
@@ -78,9 +79,29 @@ public class CachedbApplicationTests {
 		//fsmTest(system,ext);
 		//fsmDBWriteTest(system,ext);
 		//routerTest(system,ext);
-		supervisorTest(system,ext);
+		//supervisorTest(system,ext);
+		persistenceMessage(system,ext);
 		
 		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );		
+	}
+	
+	protected void persistenceMessage(ActorSystem system,SpringExtension ext)  {
+	    new TestKit(system) {{
+	    	ActorRef probe = getRef();
+	    	//메시지 목적대상 액터 생성
+	    	final ActorRef myDestination = system.actorOf(ext.props("myDestination"),"myDes");	    	
+	    	final ActorSelection myDes = system.actorSelection("/user/myDes");
+	    	
+	    	//재전송가능한 메시지 발송기 생성 ( 옵션은 목적대상 액터선택자 ) 
+	        final ActorRef myPersistentActor = system.actorOf( ext.props("myPersistentActor",myDes ), "myPersistentActor"  );
+	        
+	        for(int i=0;i<10;i++) {
+	        	myPersistentActor.tell( "hi " + i ,ActorRef.noSender() );	        	
+	        }
+	        
+	        //장애 시나리오를 가정하고,메시지가 모두 처리되는 시간 25초로 가정
+	        expectNoMessage(java.time.Duration.ofSeconds(25));	        
+	    }};
 	}
 	
 	protected void supervisorTest(ActorSystem system,SpringExtension ext) throws Exception {
