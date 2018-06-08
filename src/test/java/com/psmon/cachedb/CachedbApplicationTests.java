@@ -331,8 +331,7 @@ public class CachedbApplicationTests {
 			ItemBuyLog addBuyLog = new ItemBuyLog(buyTime, buyItem, buyUser);
 			itemBuyLogRepository.save(addBuyLog);			
 		}
+		
 		itemBuyLogRepository.flush();
-
 	}
-
 }
