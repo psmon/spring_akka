@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import akka.persistence.AbstractPersistentActorWithAtLeastOnceDelivery;
 import akka.persistence.Recovery;
 
@@ -51,6 +53,9 @@ class MsgConfirmed implements Serializable {
 @Component
 @Scope("prototype")
 public class MyPersistentActor extends AbstractPersistentActorWithAtLeastOnceDelivery {
+	
+	  private final LoggingAdapter log = Logging.getLogger(getContext().system(), "MyPersistentActor");
+	  
 	  private final ActorSelection destination;
 	  
 	  private int	msgCnt = 0;	  

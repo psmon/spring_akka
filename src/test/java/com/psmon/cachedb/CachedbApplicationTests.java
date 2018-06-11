@@ -4,7 +4,7 @@ package com.psmon.cachedb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.time.Duration;
+//import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -38,8 +38,10 @@ import akka.testkit.TestActorRef;
 import akka.testkit.TestProbe;
 import akka.testkit.javadsl.TestKit;
 import scala.concurrent.Await;
+import scala.concurrent.duration.Duration;
 
 import com.psmon.cachedb.actors.fsm.*;
+import com.psmon.cachedb.actors.persistence.Cmd;
 
 import akka.actor.AbstractFSM;
 import akka.actor.ActorRef;
@@ -47,7 +49,7 @@ import akka.japi.pf.UnitMatch;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.time.Duration;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -80,9 +82,44 @@ public class CachedbApplicationTests {
 		//fsmDBWriteTest(system,ext);
 		//routerTest(system,ext);
 		//supervisorTest(system,ext);
-		persistenceMessage(system,ext);
+		//persistenceMessage(system,ext);
+		persistenceEventSrc(system,ext);
 		
 		TestKit.shutdownActorSystem(system , scala.concurrent.duration.Duration.apply(5, TimeUnit.SECONDS ) ,true );		
+	}
+	
+	protected void persistenceEventSrc(ActorSystem system,SpringExtension ext)  {
+	    new TestKit(system) {{
+	    	ActorRef probe = getRef();	    	
+	    	
+			Props examplePersistentActor = ext.props("examplePersistentActor");
+			
+			System.out.println("eventActor 액터생성");
+			ActorRef eventActor = system.actorOf(examplePersistentActor, "eventActor");
+			
+			System.out.println("event 생성");
+			eventActor.tell(new Cmd("test1"), ActorRef.noSender());
+			eventActor.tell(new Cmd("test2"), ActorRef.noSender());
+			eventActor.tell(new Cmd("test3"), ActorRef.noSender());
+			eventActor.tell(new Cmd("test4"), ActorRef.noSender());
+			
+			System.out.println("event 재생");
+			eventActor.tell( "print" , ActorRef.noSender());			
+			expectNoMessage(java.time.Duration.ofSeconds(1));
+			
+			System.out.println("eventActor 종료또는 비정상종료");
+			eventActor.tell( akka.actor.PoisonPill.getInstance() , ActorRef.noSender());			
+			expectNoMessage(java.time.Duration.ofSeconds(1));
+			
+			System.out.println("eventActor 재생성");
+			ActorRef eventActor2 = system.actorOf(examplePersistentActor, "eventActor");
+			
+			System.out.println("event 복원확인");
+			eventActor2.tell( "print" , ActorRef.noSender());
+			
+			expectNoMessage(java.time.Duration.ofSeconds(1));
+				        
+	    }};
 	}
 	
 	protected void persistenceMessage(ActorSystem system,SpringExtension ext)  {
