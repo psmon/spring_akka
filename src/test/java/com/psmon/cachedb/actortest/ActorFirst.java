@@ -2,17 +2,11 @@ package com.psmon.cachedb.actortest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import org.springframework.stereotype.Component;
-
 import com.psmon.cachedb.actors.TestActor;
-import com.psmon.cachedb.extension.SpringExtension;
-
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.pattern.PatternsCS;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;

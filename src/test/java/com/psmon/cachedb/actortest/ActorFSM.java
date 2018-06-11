@@ -1,27 +1,22 @@
 package com.psmon.cachedb.actortest;
 
 import java.util.LinkedList;
-
 import org.springframework.stereotype.Component;
-
 import com.psmon.cachedb.actors.fsm.Batch;
 import com.psmon.cachedb.actors.fsm.Flush;
 import com.psmon.cachedb.actors.fsm.Queue;
 import com.psmon.cachedb.actors.fsm.SetTarget;
-import com.psmon.cachedb.extension.SpringExtension;
-
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 
 @Component
 public class ActorFSM  extends ActorBase  {
 	
 	public void runAll() {
-		
+		fsmTest();		
 	}
 	
-	protected void fsmTest(ActorSystem system,SpringExtension ext) {
+	protected void fsmTest() {
 	    new TestKit(system) {
 		{
 	        final ActorRef buncher =

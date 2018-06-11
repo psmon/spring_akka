@@ -1,11 +1,7 @@
 package com.psmon.cachedb.actortest;
 
 import org.springframework.stereotype.Component;
-
-import com.psmon.cachedb.extension.SpringExtension;
-
 import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import akka.testkit.javadsl.TestKit;
 
 @Component

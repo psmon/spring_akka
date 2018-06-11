@@ -1,6 +1,5 @@
 package com.psmon.cachedb.actortest;
 
-import org.springframework.context.ApplicationContext;
 import com.psmon.cachedb.extension.SpringExtension;
 import akka.actor.ActorSystem;
 

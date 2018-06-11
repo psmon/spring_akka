@@ -3,11 +3,8 @@ package com.psmon.cachedb.actortest;
 import org.springframework.stereotype.Component;
 
 import com.psmon.cachedb.actors.persistence.Cmd;
-import com.psmon.cachedb.extension.SpringExtension;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 
@@ -70,6 +67,5 @@ public class ActorPersistence extends ActorBase {
 	        expectNoMessage(java.time.Duration.ofSeconds(25));	        
 	    }};
 	}	
-	
 
 }
