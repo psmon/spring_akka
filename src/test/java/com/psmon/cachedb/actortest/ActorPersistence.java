@@ -12,8 +12,48 @@ import akka.testkit.javadsl.TestKit;
 public class ActorPersistence extends ActorBase {
 	
 	public void runAll() {
-		persistenceEventSrc();		
+		//persistenceMessage();
+		//persistenceEventSrc();		
+		persistenceSnapShot();
+		
 	}
+	
+	protected void persistenceSnapShot()  {
+	    new TestKit(system) {{
+	    	ActorRef probe = getRef();	    	
+	    	
+			Props snapShotActorProp = ext.props("snapShotActor");			
+			System.out.println("snapShotActor 액터생성");
+			ActorRef snapShotActor = system.actorOf(snapShotActorProp, "snapShotActor");
+			
+			System.out.println("event 생성");
+			snapShotActor.tell("커피", ActorRef.noSender());
+			snapShotActor.tell("사탕", ActorRef.noSender());
+			snapShotActor.tell("커피", ActorRef.noSender());
+			snapShotActor.tell("스테이크", ActorRef.noSender());
+			snapShotActor.tell("라면", ActorRef.noSender()); // <-- 복구기대 상태
+			snapShotActor.tell("사탕", ActorRef.noSender());  
+			snapShotActor.tell("커피", ActorRef.noSender());
+
+			System.out.println("상태확인");
+			snapShotActor.tell( "print" , ActorRef.noSender());			
+			expectNoMessage(java.time.Duration.ofSeconds(1));
+			
+			System.out.println("snapShotActor 종료또는 비정상종료");
+			snapShotActor.tell( akka.actor.PoisonPill.getInstance() , ActorRef.noSender());			
+			expectNoMessage(java.time.Duration.ofSeconds(1));
+			
+			System.out.println("snapShotActor 마지막 상태 확인");
+			ActorRef snapShotActo2 = system.actorOf(snapShotActorProp, "eventActor");
+			
+			System.out.println("상태 복원확인");
+			snapShotActo2.tell( "print" , ActorRef.noSender());
+			
+			expectNoMessage(java.time.Duration.ofSeconds(1));				       
+			
+	    }};
+	}
+
 	
 	protected void persistenceEventSrc()  {
 	    new TestKit(system) {{
